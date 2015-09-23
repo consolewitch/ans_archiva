@@ -1,7 +1,15 @@
 ---
 - name: "Build an ubuntu 15 node on ec2"
-  hosts: localhost 
+  hosts: localhost
   connection: local
   gather_facts: false
   roles:
     - provision
+
+- name: "provision sites"
+  hosts: tag_class_archiva
+  remote_user: ubuntu
+  sudo: yes
+  gather_facts: true
+  roles:
+    - os_prep
