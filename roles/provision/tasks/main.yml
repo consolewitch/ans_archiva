@@ -1,0 +1,39 @@
+---
+- include_vars: aws.yml
+
+- local_action: 
+    module: ec2
+    instance_type: t1.micro
+    image: ami-6989a659
+    wait: yes
+    count_tag:
+    - class: archiva
+    exact_count: 1
+    region: us-west-2
+    instance_tags: {"class":"archiva"}
+    aws_access_key: '{{ aws_access_key }}'
+    aws_secret_key: '{{ aws_secret_key }}'
+    key_name: ziege.public
+    group: ssh_and_http 
+  register: ec2
+
+- name: Add all instance public IPs to host group
+  add_host: hostname={{ item.public_ip }} groups=ec2hosts
+  with_items: ec2.instances
+
+- debug: var=ec2
+
+- add_host: 
+    name={{ item.public_ip }}
+    groups=tag_Type_{{ec2_tag_Type}},tag_Environment_{{ec2_tag_Environment}}
+    ec2_region={{ec2_region}} 
+    ec2_tag_Name={{ec2_tag_Name}}
+    ec2_tag_Type={{ec2_tag_Type}}
+    ec2_tag_Environment={{ec2_tag_Environment}}
+    ec2_ip_address={{item.public_ip}}
+  with_items: ec2.instances
+
+- name: Wait for SSH to come up
+  wait_for: host={{ item.public_ip }} port=22 delay=60 timeout=320 state=started
+  with_items: ec2.instances
+

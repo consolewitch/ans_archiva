@@ -1,0 +1,7 @@
+---
+- name: "Build an ubuntu 15 node on ec2"
+  hosts: localhost 
+  connection: local
+  gather_facts: false
+  roles:
+    - provision
