@@ -1,0 +1,7 @@
+---
+- name: "install some nice tools"
+  apt: package={{ item }} state=present
+  with_items:
+    - links
+    - apache2
+    - vim
