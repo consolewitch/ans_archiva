@@ -1,0 +1,7 @@
+---
+
+# At the time of release this is a link to the latest version of Tomcat.  You may need to update this link.
+tomcat_url: "http://apache.arvixe.com/tomcat/tomcat-8/v8.0.26/bin/apache-tomcat-8.0.26.tar.gz"
+
+# At the time of release, this is a link to the latest version of archiva. You may need to update this link.
+archiva_url: "http://apache.cs.utah.edu/archiva/2.2.0/binaries/apache-archiva-2.2.0.war"

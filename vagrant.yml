@@ -1,0 +1,7 @@
+---
+- name: "provision sites"
+  hosts: all
+  sudo: yes
+  roles:
+    - os_prep
+    - archiva
