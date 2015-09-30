@@ -1,0 +1,35 @@
+---
+# NOTE: the variables aws_access_key and aws_secret_key are stored in the aws.yml file
+# which should be encrypted using ansible-vault
+
+  # This controls the number of ec2 servers you want to spin up
+  ec2_count: 1
+
+  # ec2 instances with this tag will be counted against the ec2_count total
+  ec2_count_tag: archiva
+
+  # This controls the region in which to spin up the ec2 servers. Options are:
+  # us-east-1, us-west-1, us-west-2, sa-east-1, eu-west-1, ap-southeast-1, ap-southeast-2, ap-northeast-1
+  ec2_region: us-west-2
+
+  # This controls the instance type. Some options are:
+  ec2_instance_type: t1.micro
+
+  # This controls what tags are applied to the ec2 instance. If you want machines created
+  # by this role to be counted next time the role is run, make sure to set the class tag to 
+  # the same thing as the ec2_count_tag above. Other tags can be added to instruct other
+  # ansible roles about what to deploy to the servers.
+  ec2_tags: {"class":"{{ ec2_count_tag }}"}
+
+  # This controls which ec2 keypair is assigned to any new servers
+  ec2_public_key: ziege.public
+
+  # This controls what ec2 security group is used to determine the server's firewall settings
+  ec2_security_group: ssh_and_http
+
+  # This controls what OS will be spun up if any new servers must be added.
+  # Some options are: 
+  ec2_os_image: ami-6989a659
+
+  # Set this to the appropriate sudo-able user for the ec2_os_image
+  ec2_os_image_user: ubuntu

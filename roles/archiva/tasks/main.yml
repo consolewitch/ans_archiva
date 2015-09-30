@@ -1,0 +1,31 @@
+---
+
+- name: "download archiva if we don't already have it in the files directory"
+  local_action: get_url url={{ archiva_url }} force=no dest=./archiva.war 
+  sudo: false
+  run_once: true
+
+- name: "download tomcat if we don't already have it in the files directory"
+  sudo: false
+  local_action: get_url url={{ tomcat_url }} force=no dest=./tomcat.tar.gz
+  run_once: true
+
+- name: "extract tomcat to opt"
+  unarchive: src=tomcat.tar.gz dest=/opt/ copy=yes creates=/opt/tomcat #this is a little misleading because the tomcat folder isn't created until the next play. 
+  register: tomcat_extract
+
+- name: "get name of newly extracted tomcat directory"
+  shell: ls /opt |grep ^apache-tomcat
+  register: tomcat_dir
+  when: tomcat_extract["changed"]
+
+- name: "rename extracted tomcat to \"tomcat\"" 
+  command: mv /opt/{{ tomcat_dir["stdout"] }} /opt/tomcat
+  when: tomcat_extract["changed"]
+
+- name: "ensure directory structure for archiva exists"
+  file: path=/opt/tomcat/archiva state=directory
+
+- name: "copy archiva war to target server"
+  copy: src=./archiva.war dest=/opt/tomcat/archiva
+
