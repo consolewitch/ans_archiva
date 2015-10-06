@@ -5,3 +5,15 @@ tomcat_url: "http://apache.arvixe.com/tomcat/tomcat-8/v8.0.26/bin/apache-tomcat-
 
 # At the time of release, this is a link to the latest version of archiva. You may need to update this link.
 archiva_url: "http://apache.cs.utah.edu/archiva/2.2.0/binaries/apache-archiva-2.2.0.war"
+
+# Note, technically this is a link to download jdk.. but it won't work for you.  you'll need to grab it manually for now. 
+jdk_url: "http://download.oracle.com/otn-pub/java/jdk/8u60-b27/jdk-8u60-linux-x64.tar.gz"
+
+# Java Activation Framework (from search.maven.org aka: the central repository)
+jaf_url: "http://search.maven.org/remotecontent?filepath=eu/ocathain/javax/activation/activation/1.1.1/activation-1.1.1.jar"
+
+# java mail api 
+mailapi_url: "http://search.maven.org/remotecontent?filepath=com/sun/mail/mailapi/1.5.4/mailapi-1.5.4.jar"
+
+# derby
+derby_url: "http://search.maven.org/remotecontent?filepath=org/wisdom-framework/derby/10.11.1.1_2/derby-10.11.1.1_2.jar"

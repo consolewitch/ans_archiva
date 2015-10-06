@@ -1,14 +1,37 @@
 ---
 
-- name: "download archiva if we don't already have it in the files directory"
-  local_action: get_url url={{ archiva_url }} force=no dest=./archiva.war 
-  sudo: false
-  run_once: true
+# get
 
 - name: "download tomcat if we don't already have it in the files directory"
   sudo: false
   local_action: get_url url={{ tomcat_url }} force=no dest=./tomcat.tar.gz
   run_once: true
+
+- name: "download JDK if we don't already have it in the files directory"
+  sudo: false
+  local_action: get_url url={{ jdk_url }} force=no dest=./jdk.tar.gz
+
+- name: "download archiva if we don't already have it in the files directory"
+  local_action: get_url url={{ archiva_url }} force=no dest=./archiva.war 
+  sudo: false
+  run_once: true
+
+- name: "download java activation framework if we don't have it already in the files directory"
+  local_action: get_url url={{ jaf_url }} force=no dest=./activation.jar
+  sudo: false
+  run_once: true
+
+- name: "download java mail api if we don't have it already"
+  local_action: get_url url={{ mailapi_url }} force=no dest=./mailapi.jar
+  sudo: false
+  run_once: true
+
+- name: "download derby if we don't have it already"
+  local_action: get_url url={{ derby_url }} force=no dest=./derby.jar
+  sudo: false
+  run_once: true
+
+# extract
 
 - name: "extract tomcat to opt"
   unarchive: src=tomcat.tar.gz dest=/opt/ copy=yes creates=/opt/tomcat #this is a little misleading because the tomcat folder isn't created until the next play. 
@@ -23,9 +46,44 @@
   command: mv /opt/{{ tomcat_dir["stdout"] }} /opt/tomcat
   when: tomcat_extract["changed"]
 
+- name: "extract jdk to /usr"
+  unarchive: src=jdk.tar.gz dest=/usr/ copy=yes creates=/usr/java #similar to before, this is misleading because the java folder isn't created until the next play.
+  register: jdk_extract
+
+- name: "get name of newly extracted JDK"
+  shell: ls /usr |grep ^jdk
+  register: jdk_dir 
+
+- name: "link /usr/java to newly extracted java directory"
+  file: src={{ jdk_dir["stdout"] }} path=/usr/java state=link
+
 - name: "ensure directory structure for archiva exists"
   file: path=/opt/tomcat/archiva state=directory
 
 - name: "copy archiva war to target server"
   copy: src=./archiva.war dest=/opt/tomcat/archiva
 
+# config archiva
+
+- name: ensure existance and configuration of setenv.sh
+  lineinfile: line="export JAVA_HOME=/usr/java" dest=/opt/tomcat/bin/setenv.sh create=yes state=present
+
+- name: get verison of tomcat
+  shell: /opt/tomcat/bin/version.sh
+  register: tomcat_ver
+
+- name: "ensure existance of tomcathome/conf/Catalina/localhost directory"
+  file: path=/opt/tomcat/conf/Catalina/localhost state=directory
+
+- name: "configure tomcat to run archiva"
+  template: src=archiva.xml.j2 dest=/opt/tomcat/conf/Catalina/localhost/archiva.xml
+
+## TODO: in tomcat 6 the dest directory should be /opt/tomcat/lib instead
+- name: "copy over the mailapi.jar"
+  copy: src=./mailapi.jar dest=/opt/tomcat/common/lib/
+
+- name: "copy over the mailapi.jar"
+  copy: src=./derby.jar dest=/opt/tomcat/common/lib/
+
+- name: "copy over the mailapi.jar"
+  copy: src=./activation.jar dest=/opt/tomcat/common/lib/
