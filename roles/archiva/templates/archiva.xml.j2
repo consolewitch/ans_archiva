@@ -1,4 +1,4 @@
-{% if {{ tomcat.version < 6 }} %} <?xml version="2.0" encoding="UTF-8"?> {% endif %}
+{% if tomcat_ver.stdout_lines[7][16] < 6 %} <?xml version="2.0" encoding="UTF-8"?> {% endif %}
  <Context path="/archiva"
           docBase="${catalina.home}/archiva/apache-archiva-1.1.war">
 

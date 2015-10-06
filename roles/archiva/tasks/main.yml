@@ -72,14 +72,11 @@
   shell: /opt/tomcat/bin/version.sh
   register: tomcat_ver
 
-- debug: var={{ tomcat_ver["stdout"] }}
-#|regex_replace('Server number:  ([0-9]*)','') }}
-
 - name: "ensure existance of tomcathome/conf/Catalina/localhost directory"
   file: path=/opt/tomcat/conf/Catalina/localhost state=directory
 
-#- name: "configure tomcat to run archiva"
-#  template: src=archiva.xml.j2 dest=/opt/tomcat/conf/Catalina/localhost/archiva.xml
+- name: "configure tomcat to run archiva"
+  template: src=archiva.xml.j2 dest=/opt/tomcat/conf/Catalina/localhost/archiva.xml
 
 ## TODO: in tomcat 6 the dest directory should be /opt/tomcat/lib instead
 - name: "copy over the mailapi.jar"
