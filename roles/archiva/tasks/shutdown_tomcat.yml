@@ -1,0 +1,14 @@
+---
+
+- name: "check for pid"
+  stat: path=/opt/tomcat/bin/catalina.pid
+  register: catalina_pid
+
+- name: "if pid exists call tomcat stop script"
+  shell: nohup /opt/tomcat/bin/shutdown.sh
+  when: catalina_pid.stat.exists
+  ignore_errors: true
+
+- name: "wait for pid to dissapear"
+  wait_for: path=/opt/tomcat/bin/catalina.pid state=absent timeout=300
+  when: catalina_pid.stat.exists

@@ -4,3 +4,15 @@
   with_items:
     - links
     - vim
+    - maven
+
+- name: stop and disable apache2
+  service: name=apache2 state=stopped enabled=no
+  ignore_errors: yes
+
+- name: stop and disable NginX
+  service: name=nginx state=stopped enabled=no
+  ignore_errors: yes
+
+- name: turn off ufw
+  ufw: state=disabled

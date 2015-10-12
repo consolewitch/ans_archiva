@@ -17,3 +17,9 @@ mailapi_url: "http://search.maven.org/remotecontent?filepath=com/sun/mail/mailap
 
 # derby
 derby_url: "http://search.maven.org/remotecontent?filepath=org/wisdom-framework/derby/10.11.1.1_2/derby-10.11.1.1_2.jar"
+
+# port that tomcat will answer
+tomcat_port: 80
+
+# port where tomcat will direct https requests that come in on wrong port
+tomcat_port_ssl: 443

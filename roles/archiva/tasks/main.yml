@@ -1,7 +1,9 @@
 ---
 
-# get
+- name: "just in case all of this has happened before, stop tomcat"
+  include: shutdown_tomcat.yml
 
+# get
 - name: "download tomcat if we don't already have it in the files directory"
   sudo: false
   local_action: get_url url={{ tomcat_url }} force=no dest=./tomcat.tar.gz
@@ -21,10 +23,21 @@
   sudo: false
   run_once: true
 
-- name: "download java mail api if we don't have it already"
-  local_action: get_url url={{ mailapi_url }} force=no dest=./mailapi.jar
+#- name: "download java mail api if we don't have it already"
+#  local_action: get_url url={{ mailapi_url }} force=no dest=./mailapi.jar
+#  sudo: false
+#  run_once: true
+
+# maven_artifact is introduced in version 2 of ansible
+#- name: "grab mailapi.jar from the central maven repository"
+#  maven_artifact: group_id=com.sun.mail artifact_id=mailapi dest=/opt/tomcat/lib/mailapi.jar
+
+- name: "download required version of mailapi.jar"
+  local_action: shell mvn org.apache.maven.plugins:maven-dependency-plugin:LATEST:copy -Dartifact=com.sun.mail:mailapi:1.5.4 -DoutputDirectory=./roles/archiva/files/mailapi -Dmdep.useBaseVersion=true
   sudo: false
   run_once: true
+
+
 
 - name: "download derby if we don't have it already"
   local_action: get_url url={{ derby_url }} force=no dest=./derby.jar
@@ -65,10 +78,10 @@
 
 # config archiva
 
-- name: ensure existance and configuration of setenv.sh
+- name: "ensure existance and configuration of setenv.sh"
   lineinfile: line="export JAVA_HOME=/usr/java" dest=/opt/tomcat/bin/setenv.sh create=yes state=present
 
-- name: get verison of tomcat
+- name: "get verison of tomcat"
   shell: /opt/tomcat/bin/version.sh
   register: tomcat_ver
 
@@ -78,12 +91,25 @@
 - name: "configure tomcat to run archiva"
   template: src=archiva.xml.j2 dest=/opt/tomcat/conf/Catalina/localhost/archiva.xml
 
-## TODO: in tomcat 6 the dest directory should be /opt/tomcat/lib instead
+## TODO: archiva docs indicate that tomcat > 6 has a tomcat/common/lib directory for these.. but i'm only seeing it in > 7
 - name: "copy over the mailapi.jar"
-  copy: src=./mailapi.jar dest=/opt/tomcat/common/lib/
+  copy: src={{ item }} dest=/opt/tomcat/lib/
+  with_fileglob: "./mailapi/*"
 
-- name: "copy over the mailapi.jar"
-  copy: src=./derby.jar dest=/opt/tomcat/common/lib/
+- name: "copy over the derby.jar"
+  copy: src=./derby.jar dest=/opt/tomcat/lib/
 
-- name: "copy over the mailapi.jar"
-  copy: src=./activation.jar dest=/opt/tomcat/common/lib/
+- name: "copy over the activation.jar"
+  copy: src=./activation.jar dest=/opt/tomcat/lib/
+
+- name: "configure tomcat users file"
+  template: src=tomcat-users.xml.j2 dest=/opt/tomcat/conf/tomcat-users.xml
+
+- name: "configure paths and tomcat vars in setenv.sh"
+  template: src=setenv.sh.j2 dest=/opt/tomcat/bin/setenv.sh
+
+- name: "configure tomcat's home port"
+  template: src=server.xml.j2 dest=/opt/tomcat/conf/server.xml force=yes
+
+- name: "start tomcat"
+  include: startup_tomcat.yml
