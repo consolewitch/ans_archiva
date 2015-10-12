@@ -1,0 +1,25 @@
+---
+
+- name: "check to see if catalina.out exists"
+  stat: path=/opt/tomcat/logs/catalina.out
+  register: catalina_out
+
+- name: "check to see if tomcat is running"
+  stat: path=/opt/tomcat/bin/catalina.pid
+  register: catalina_pid
+
+- name: "rotate catalina.out"
+  shell: mv /opt/tomcat/logs/catalina.out /opt/tomcat/logs/catalina.`date +%Y%m%d%H%M%S`.log executable=/bin/bash
+  when: not catalina_pid.stat.exists and catalina_out.stat.exists 
+
+- name: "recreate catalina.out in case tomcat hasn't done it yet"
+  command: touch /opt/tomcat/logs/catalina.out
+  when: not catalina_pid.stat.exists and catalina_out.stat.exists  
+
+- name: "ask tomcat to start" 
+  shell: nohup /opt/tomcat/bin/startup.sh
+  when: not catalina_pid.stat.exists
+
+- name: "wait for tomcat to report started in catalina.out"
+  wait_for: path=/opt/tomcat/logs/catalina.out search_regex="$Server startup in"
+  when: not catalina_pid.stat.exists

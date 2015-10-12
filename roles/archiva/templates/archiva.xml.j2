@@ -1,6 +1,6 @@
 {% if tomcat_ver.stdout_lines[7][16] < 6 %} <?xml version="2.0" encoding="UTF-8"?> {% endif %}
  <Context path="/archiva"
-          docBase="${catalina.home}/archiva/apache-archiva-1.1.war">
+          docBase="${catalina.home}/archiva/archiva.war">
 
  <Resource name="jdbc/users" auth="Container" type="javax.sql.DataSource"
            username="sa"
